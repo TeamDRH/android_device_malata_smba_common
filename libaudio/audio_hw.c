@@ -16,7 +16,7 @@
  */
 
 #define LOG_TAG "audio_hw_primary"
-//#define LOG_NDEBUG 0
+#define LOG_NDEBUG 0
 
 #include <errno.h>
 #include <pthread.h>
@@ -144,23 +144,35 @@ struct route_setting defaults[] = {
     /* general */
     {
         .ctl_name = MIXER_PCM_PLAYBACK_VOLUME,
-        .intval = PERC_TO_PCM_VOLUME(1),
+        .intval = PERC_TO_PCM_VOLUME(1.0),
     },
     {
 	.ctl_name = MIXER_PCM_CAPTURE_VOLUME,
-	.intval = PERC_TO_CAPTURE_VOLUME(1),
+	.intval = 20,
     },
     {
         .ctl_name = MIXER_HEADSET_PLAYBACK_VOLUME,
-        .intval = PERC_TO_HEADSET_VOLUME(1),
+        .intval = PERC_TO_HEADSET_VOLUME(1.0),
     },
     {
         .ctl_name = MIXER_SPEAKER_PLAYBACK_VOLUME,
-        .intval = PERC_TO_SPEAKER_VOLUME(1),
+	.intval = PERC_TO_SPEAKER_VOLUME(0.6),
     },
     {
         .ctl_name = MIXER_MIC_CAPTURE_VOLUME,
-        .intval = PERC_TO_MIC_VOLUME(1),
+        .intval = PERC_TO_CAPTURE_VOLUME(1.0),
+    },
+    {
+        .ctl_name = "Mic2 Capture Volume",
+        .intval = 31,
+    },
+    {
+        .ctl_name = "Mic 1 Boost Volume",
+        .intval = 2,
+    },
+    {
+        .ctl_name = "Mic 2 Boost Volume",
+        .intval = 2,
     },
     {
         .ctl_name = MIXER_HEADSET_PLAYBACK_SWITCH,
@@ -172,23 +184,23 @@ struct route_setting defaults[] = {
     },
     {
         .ctl_name = MIXER_SPEAKER_PLAYBACK_SWITCH,
-        .intval = 1,
+        .intval = 0,
     },
     {
         .ctl_name = INTERNAL_SPEAKER_SWITCH,
-        .intval = 1,
+        .intval = 0,
     },
     {
         .ctl_name = MIXER_MIC_LEFT_CAPTURE_SWITCH,
-        .intval = 1,
+        .intval = 0,
     },
     {
         .ctl_name = MIXER_MIC_RIGHT_CAPTURE_SWITCH,
-        .intval = 1,
+        .intval = 0,
     },
     {
         .ctl_name = INTERNAL_MIC_SWITCH,
-        .intval = 1,
+        .intval = 0,
     },
     {
         .ctl_name = MIXER_HPL_OUTMUX,
@@ -219,19 +231,19 @@ struct route_setting defaults[] = {
 struct route_setting headphone_route[] = {
     {
         .ctl_name = HEADPHONE_JACK_SWITCH,
-        .intval = 1,
+		.intval = 1,
     },
     {
         .ctl_name = MIXER_HEADSET_PLAYBACK_SWITCH,
-        .intval = 1,
+		.intval = 1,
     },
     {
         .ctl_name = INTERNAL_SPEAKER_SWITCH,
-        .intval = 0,
+		.intval = 0,
     },
     {
         .ctl_name = MIXER_SPEAKER_PLAYBACK_SWITCH,
-        .intval = 0,
+		.intval = 0,
     },
     {
         .ctl_name = NULL,
@@ -242,19 +254,19 @@ struct route_setting headphone_route[] = {
 struct route_setting speaker_route[] = {
     {
         .ctl_name = HEADPHONE_JACK_SWITCH,
-        .intval = 0,
+		.intval = 0,
     },
     {
         .ctl_name = MIXER_HEADSET_PLAYBACK_SWITCH,
-        .intval = 0,
+		.intval = 0,
     },
     {
         .ctl_name = INTERNAL_SPEAKER_SWITCH,
-        .intval = 1,
+		.intval = 1,
     },
     {
         .ctl_name = MIXER_SPEAKER_PLAYBACK_SWITCH,
-        .intval = 1,
+		.intval = 1,
     },
     {
         .ctl_name = NULL,
@@ -265,19 +277,57 @@ struct route_setting speaker_route[] = {
 struct route_setting speaker_headphone_route[] = {
     {
         .ctl_name = HEADPHONE_JACK_SWITCH,
-        .intval = 1,
+		.intval = 1,
     },
     {
         .ctl_name = MIXER_HEADSET_PLAYBACK_SWITCH,
-        .intval = 1,
+		.intval = 1,
     },
     {
         .ctl_name = INTERNAL_SPEAKER_SWITCH,
-        .intval = 1,
+		.intval = 1,
     },
     {
         .ctl_name = MIXER_SPEAKER_PLAYBACK_SWITCH,
+		.intval = 1,
+    },
+    {
+        .ctl_name = NULL,
+    }
+};
+
+/* Mic on route */
+struct route_setting mic_on_route[] = {
+    {
+        .ctl_name = INTERNAL_MIC_SWITCH,
         .intval = 1,
+    },
+    {
+        .ctl_name = MIXER_MIC_LEFT_CAPTURE_SWITCH,
+        .intval = 1,
+    },
+    {
+        .ctl_name = MIXER_MIC_RIGHT_CAPTURE_SWITCH,
+        .intval = 1,
+    },
+    {
+        .ctl_name = NULL,
+    }
+};
+
+/* Mic off route */
+struct route_setting mic_off_route[] = {
+    {
+        .ctl_name = INTERNAL_MIC_SWITCH,
+        .intval = 0,
+    },
+    {
+        .ctl_name = MIXER_MIC_LEFT_CAPTURE_SWITCH,
+        .intval = 0,
+    },
+    {
+        .ctl_name = MIXER_MIC_RIGHT_CAPTURE_SWITCH,
+        .intval = 0,
     },
     {
         .ctl_name = NULL,
@@ -288,19 +338,19 @@ struct route_setting speaker_headphone_route[] = {
 struct route_setting no_out_route[] = {
     {
         .ctl_name = HEADPHONE_JACK_SWITCH,
-        .intval = 0,
+		.intval = 0,
     },
     {
         .ctl_name = MIXER_HEADSET_PLAYBACK_SWITCH,
-        .intval = 0,
+		.intval = 0,
     },
     {
         .ctl_name = INTERNAL_SPEAKER_SWITCH,
-        .intval = 0,
+		.intval = 0,
     },
     {
         .ctl_name = MIXER_SPEAKER_PLAYBACK_SWITCH,
-        .intval = 0,
+		.intval = 0,
     },
     {
         .ctl_name = NULL,
@@ -370,6 +420,8 @@ struct audio_device {
 
     bool screen_off;
 
+    bool isRecording;
+
     struct stream_out *active_out;
     struct stream_in *active_in;
 };
@@ -400,8 +452,8 @@ struct stream_in {
     bool standby;
 
     unsigned int subsample_shift;	/* Subsampling factor (1<<shift), to emulate different submultiples of sampling rate .Only supported values are 0,1,2 */
-    int16_t* buffer;				/* Temporary buffer to make subsampling */
-    unsigned int frames_to_mute;	/* Count of samples to be muted. Hw needs some stabilization time, otherwise, a POP is captured that fools Voice Recognizer */
+	int16_t* buffer;				/* Temporary buffer to make subsampling */
+	unsigned int frames_to_mute;	/* Count of samples to be muted. Hw needs some stabilization time, otherwise, a POP is captured that fools Voice Recognizer */
 
     struct audio_device *dev;
 };
@@ -439,6 +491,16 @@ static void select_devices(struct audio_device *adev)
 			break;
 	}
 
+	/* Turn on/off Mic routes */
+	if(adev->isRecording) {
+		ALOGD("Mic activate");
+		set_route_by_array(adev->mixer, mic_on_route, 1);
+	} else {
+                ALOGD("Mic deactivate");
+                set_route_by_array(adev->mixer, mic_off_route, 1);
+        }
+
+
 	ALOGD("Headphone out:%c, Speaker out:%c, HDMI out:%c, BT out:%c\n",
 		(adev->devices & AUDIO_DEVICE_OUT_WIRED_HEADPHONE) ? 'Y' : 'N',
 		(adev->devices & AUDIO_DEVICE_OUT_SPEAKER) ? 'Y' : 'N',
@@ -470,13 +532,17 @@ static void do_in_standby(struct stream_in *in)
     if (!in->standby) {
         pcm_close(in->pcm);
         in->pcm = NULL;
-
-        if (in->buffer) {
-            free(in->buffer);
-            in->buffer = NULL;
-        }
-
+		
+		if (in->buffer) {
+			free(in->buffer);
+			in->buffer = NULL;
+		}
+		
         adev->active_in = NULL;
+
+	adev->isRecording = false;
+	
+	select_devices(adev);
 
         in->standby = true;
     }
@@ -515,6 +581,8 @@ static int start_output_stream(struct stream_out *out)
 
 	adev->active_out = out;
 
+	select_devices(adev);
+
     return 0;
 }
 
@@ -548,13 +616,18 @@ static int start_input_stream(struct stream_in *in)
 
     /* If needed, allocate the resample buffer */
     if (in->subsample_shift) {
-        in->buffer = malloc(in->pcm_config.period_size * in->pcm_config.channels * sizeof(int16_t));
+		in->buffer = malloc(in->pcm_config.period_size * in->pcm_config.channels * sizeof(int16_t));
     }
-
-    /* Mute some samples at start of capture, to let line calm down */
-    in->frames_to_mute = FRAMES_MUTED_AT_CAPTURE_START;
-
+	
+	/* Mute some samples at start of capture, to let line calm down */
+	in->frames_to_mute = FRAMES_MUTED_AT_CAPTURE_START;
+	
 	adev->active_in = in;
+
+	adev->isRecording = true;
+
+	select_devices(adev);
+
     return 0;
 }
 
@@ -1044,7 +1117,7 @@ static ssize_t in_read(struct audio_stream_in *stream, void* buffer,
 
 	int16_t* in_buffer = (int16_t*)buffer;
 
-    ALOGD("in_read: bytes:%d",bytes);
+	//ALOGD("in_read: bytes:%d",bytes);
 
     /*
      * acquiring hw device mutex systematically is useful if a low
@@ -1131,16 +1204,16 @@ static ssize_t in_read(struct audio_stream_in *stream, void* buffer,
 		} while (--chunkstodo);	
     } else {
 
-        ret = pcm_read(in->pcm, in_buffer, in_frames * frame_size);
-        if (ret > 0)
-            ret = 0;
-
-        /*
-         * Instead of writing zeroes here, we could trust the hardware
-         * to always provide zeroes when muted.
-         */
-    	if (ret == 0 && (adev->mic_mute || in->frames_to_mute))
-          memset(buffer, 0, bytes);
+		ret = pcm_read(in->pcm, in_buffer, in_frames * frame_size);
+	    if (ret > 0)
+	        ret = 0;
+	
+	    /*
+	     * Instead of writing zeroes here, we could trust the hardware
+	     * to always provide zeroes when muted.
+	     */
+		if (ret == 0 && (adev->mic_mute || in->frames_to_mute))
+	        memset(buffer, 0, bytes);
     }
 
 	/* Decrement the number of samples to be muted if any */
@@ -1499,11 +1572,11 @@ static uint32_t adev_get_supported_devices(const struct audio_hw_device *dev)
             AUDIO_DEVICE_OUT_SPEAKER |
             AUDIO_DEVICE_OUT_WIRED_HEADPHONE |
             AUDIO_DEVICE_OUT_AUX_DIGITAL |
-            AUDIO_DEVICE_OUT_ALL_SCO |
+			AUDIO_DEVICE_OUT_ALL_SCO |
             AUDIO_DEVICE_OUT_DEFAULT |
             /* IN */
             AUDIO_DEVICE_IN_BUILTIN_MIC |
-            AUDIO_DEVICE_IN_ALL_SCO |
+			AUDIO_DEVICE_IN_ALL_SCO |
             AUDIO_DEVICE_IN_DEFAULT);
 }
 
@@ -1652,4 +1725,5 @@ struct audio_module HAL_MODULE_INFO_SYM = {
         .methods = &hal_module_methods,
     },
 };
+
 
