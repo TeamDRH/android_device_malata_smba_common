@@ -77,3 +77,7 @@ BOARD_FLASH_BLOCK_SIZE := 131072
 BOARD_USES_SECURE_SERVICES := true
 
 TARGET_OTA_ASSERT_SKIP := true
+
+BOARD_BLUEDROID_VENDOR_CONF := device/malata/smba_common/bluetooth/libbt_vndcfg.txt
+BOARD_BLUETOOTH_BDROID_BUILDCFG_INCLUDE_DIR ?= device/malata/smba_common/bluetooth
+
