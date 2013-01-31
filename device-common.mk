@@ -59,8 +59,7 @@ PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.software.sip.voip.xml:system/etc/permissions/android.software.sip.voip.xml \
     frameworks/native/data/etc/android.hardware.usb.accessory.xml:system/etc/permissions/android.hardware.usb.accessory.xml \
     frameworks/native/data/etc/android.hardware.usb.host.xml:system/etc/permissions/android.hardware.usb.host.xml \
-    frameworks/native/data/etc/android.hardware.sensor.compass.xml:system/etc/permissions/android.hardware.sensor.compass.xml \
-    packages/wallpapers/LivePicker/android.software.live_wallpaper.xml:system/etc/permissions/android.software.live_wallpaper.xml 
+    frameworks/native/data/etc/android.hardware.sensor.compass.xml:system/etc/permissions/android.hardware.sensor.compass.xml
 
 PRODUCT_TAGS += dalvik.gc.type-precise
 
@@ -72,7 +71,6 @@ PRODUCT_COPY_FILES += \
 
 # Harmony Configs
 PRODUCT_COPY_FILES += \
-    device/malata/smba_common/prebuilt/init.harmony.rc:root/init.harmony.rc \
     device/malata/smba_common/prebuilt/init.harmony.usb.rc:root/init.harmony.usb.rc \
     device/malata/smba_common/prebuilt/ueventd.harmony.rc:root/ueventd.harmony.rc \
     device/malata/smba_common/prebuilt/bcmdhd.cal:system/etc/wifi/bcmdhd.cal \
@@ -89,10 +87,6 @@ PRODUCT_COPY_FILES += \
 # Touchscreen
 PRODUCT_COPY_FILES += \
     device/malata/smba_common/prebuilt/at168_touch.idc:system/usr/idc/at168_touch.idc 
-
-# Generic
-PRODUCT_COPY_FILES += \
-   device/malata/smba_common/prebuilt/vold.fstab:system/etc/vold.fstab
 
 PRODUCT_PROPERTY_OVERRIDES += \
     BUILD_UTC_DATE=0 \
